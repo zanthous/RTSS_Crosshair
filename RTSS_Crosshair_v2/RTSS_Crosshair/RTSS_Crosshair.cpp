@@ -60,11 +60,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		TEXT("EDIT"),
 		TEXT("RightCtrl + Num0 - Default settings \r\n"
 			"RightCtrl + Num5 - Center \r\n"
-			"RightCtrl + Num1, Num4, Num6, Num8 - move by 1 pixel \r\n"
-			"Num1, Num4, Num6, Num8 + RightShift - move by 50 pixels \r\n"
-			"RightCtrl + Num+ - increase size by 10% \r\n"
-			"RightCtrl + Num- - decrease size by 10% \r\n"
-			"RightCtrl + Num. - save current position in registry"),
+			"RightCtrl + IJKL - move by 1 pixel \r\n"
+			"RightCtrl + WASD - move by 50 pixels \r\n"
+			"RightCtrl + 2 - increase size by 10% \r\n"
+			"RightCtrl + 1 - decrease size by 10% \r\n"
+			"RightCtrl + 3 - save current position in registry"),
 		WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_READONLY,
 		2, 2, 400, 122, hWnd, (HMENU)1, hInstance, NULL);
 
@@ -176,14 +176,14 @@ DWORD WINAPI ThreadProc(LPVOID param)
 
 	while (TRUE) {
 
-		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(VK_DECIMAL)) {
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x33)) { // 3 key, save
 			RegSetKeyValueA(HKEY_CURRENT_USER, "Software\\RTSS_Crosshair", "x_coord", REG_DWORD, &crossX, (DWORD)sizeof(crossX));
 			RegSetKeyValueA(HKEY_CURRENT_USER, "Software\\RTSS_Crosshair", "y_coord", REG_DWORD, &crossY, (DWORD)sizeof(crossY));
 			RegSetKeyValueA(HKEY_CURRENT_USER, "Software\\RTSS_Crosshair", "size", REG_DWORD, &crossSize, (DWORD)sizeof(crossSize));
 			RegSetKeyValueA(HKEY_CURRENT_USER, "Software\\RTSS_Crosshair", "char", REG_SZ, &crosshair_char, (DWORD)sizeof(crosshair_char));
 		}
 
-		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(VK_NUMPAD5)) {
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x35)) { //5 key, center
 			RECT rect;
 			if (GetClientRect(GetForegroundWindow(), &rect)) //GetClientRect GetWindowRect
 			{
@@ -193,59 +193,75 @@ DWORD WINAPI ThreadProc(LPVOID param)
 			}
 		}
 
-		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(VK_NUMPAD0)) {
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x30)) { //0 key, set crosshair to top left
 			crossX = 0;
 			crossY = 0;
 			crossSize = 100;
 			changeState = true;
 		}
 
-		if (GetAsyncKeyState(VK_RSHIFT) && GetAsyncKeyState(VK_NUMPAD4)) {
-			crossX -= 50;
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x41)) { //A key, fast move left
+
+			if (crossX - 50 < 0)
+			{
+				crossX = 0;
+			}
+			else
+			{
+				crossX -= 50;
+			}
+			
 			changeState = true;
 		}
 
-		if (GetAsyncKeyState(VK_RSHIFT) && GetAsyncKeyState(VK_NUMPAD6)) {
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x44)) {//D key, fast move right
 			crossX += 50;
 			changeState = true;
 		}
 
-		if (GetAsyncKeyState(VK_RSHIFT) && GetAsyncKeyState(VK_NUMPAD8)) {
-			crossY -= 50;
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x57)) {//W key, fast move up
+			if (crossY - 50 < 0)
+			{
+				crossY = 0;
+			}
+			else
+			{
+				crossY -= 50;
+			}
 			changeState = true;
 		}
 
-		if (GetAsyncKeyState(VK_RSHIFT) && GetAsyncKeyState(VK_NUMPAD2)) {
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x53)) {//S key, fast move down
 			crossY += 50;
 			changeState = true;
 		}
 
-		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(VK_NUMPAD4)) {
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x4A)) {//J key, fine move left
 			crossX--;
 			changeState = true;
 		}
 
-		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(VK_NUMPAD6)) {
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x4C)) {//L key, fine move right
 			crossX++;
 			changeState = true;
 		}
 
-		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(VK_NUMPAD8)) {
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x49)) {//I key, fine move up
 			crossY--;
 			changeState = true;
 		}
 
-		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(VK_NUMPAD2)) {
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x4B)) {//K key, fine move down
 			crossY++;
 			changeState = true;
 		}
 
-		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(VK_ADD)) {
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x32)) {//2 key, increase size
 			crossSize += 5;
 			changeState = true;
 		}
 
-		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(VK_SUBTRACT)) {
+		if (GetAsyncKeyState(VK_RCONTROL) && GetAsyncKeyState(0x31)) {//1 key, decrease size
 			crossSize -= 5;
 			changeState = true;
 		}
